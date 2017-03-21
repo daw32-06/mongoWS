@@ -20,7 +20,7 @@ var Departamento = mongoose.model('Departamento', schema);
 
 // Peticion GET a la raiz
 server.get('/', function(req, res){
-	console.log("peticion a /");
+	console.log("GET /");
 	// DBdepartamento es el nombre de la base de datos
 	mongoose.connect('mongodb://localhost/DBdepartamento');
 	var db = mongoose.connection;
@@ -83,19 +83,33 @@ server.post('/nuevo', function(req, res){
 		dep.save(function(err,data){
 			if (err)
 			{
-				console.log(err);
-				res.status(304).send("El registro esta duplicado");
-			} else{
-				console.log('Saved : ', data );
-				res.status(201).send("Registro insertado");
-			}
-		});
+				//res.status(409).send();
+				switch(err.code){
+					case 11000:
+						console.log('clave duplicada');
+					//	res.send("Error");
+						res.sendStatus(409);
 
+						break;
+					default:
+
+						console.log(err);
+				}
+
+			} /*else{
+				//console.log('Saved : ', data );
+				res.status(201).send();
+				res.end();
+			}*/
+
+
+		});
+		//res.end();
 	});
 
 
 	mongoose.disconnect();
-  	res.end();
+
 });
 // Arrancamos el servidor
 server.listen(3000, function(){
